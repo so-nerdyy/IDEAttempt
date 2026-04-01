@@ -28,9 +28,13 @@
     "views": {
       "kilo-code-ActivityBar": [
         {
+          "id": "kilo-code.sessionTree",
+          "name": "Sessions"
+        },
+        {
           "type": "webview",
-          "id": "kilo-code.SidebarProvider",
-          "name": "Kilo Code"
+          "id": "kilo-code.chatView",
+          "name": "Chat"
         }
       ]
     },
@@ -44,8 +48,75 @@
         "command": "kilo-code.new.focusChatInput",
         "title": "Focus Chat Input",
         "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.session.new",
+        "title": "New Session",
+        "icon": "$(add)",
+        "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.session.delete",
+        "title": "Delete Session",
+        "icon": "$(trash)",
+        "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.session.fork",
+        "title": "Fork Session",
+        "icon": "$(git-branch)",
+        "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.session.search",
+        "title": "Search Sessions",
+        "icon": "$(search)",
+        "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.session.select",
+        "title": "Select Session",
+        "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.settings.open",
+        "title": "Open Settings",
+        "icon": "$(gear)",
+        "category": "Kilo Code"
+      },
+      {
+        "command": "kilo-code.profile.open",
+        "title": "Open Profile",
+        "icon": "$(account)",
+        "category": "Kilo Code"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "kilo-code.session.new",
+          "when": "view == kilo-code.sessionTree",
+          "group": "navigation"
+        },
+        {
+          "command": "kilo-code.session.search",
+          "when": "view == kilo-code.sessionTree",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "kilo-code.session.fork",
+          "when": "view == kilo-code.sessionTree && viewItem == session",
+          "group": "inline"
+        },
+        {
+          "command": "kilo-code.session.delete",
+          "when": "view == kilo-code.sessionTree && viewItem == session",
+          "group": "inline"
+        }
+      ]
+    },
     "configuration": {
       "title": "Kilo Code",
       "properties": {
