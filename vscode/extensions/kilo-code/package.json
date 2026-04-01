@@ -1,0 +1,80 @@
+{
+  "name": "kilo-code-builtin",
+  "displayName": "Kilo Code: AI Coding Agent",
+  "description": "Open Source AI coding agent — built-in to VS Code",
+  "version": "7.1.12",
+  "private": true,
+  "icon": "assets/icons/logo-outline-black.png",
+  "publisher": "kilocode",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.105.1"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "kilo-code-ActivityBar",
+          "title": "Kilo Code",
+          "icon": "assets/icons/kilo-light.png",
+          "darkIcon": "assets/icons/kilo_dark.png"
+        }
+      ]
+    },
+    "views": {
+      "kilo-code-ActivityBar": [
+        {
+          "type": "webview",
+          "id": "kilo-code.SidebarProvider",
+          "name": "Kilo Code"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "kilo-code.new.plusButtonClicked",
+        "title": "New Task",
+        "icon": "$(add)"
+      },
+      {
+        "command": "kilo-code.new.focusChatInput",
+        "title": "Focus Chat Input",
+        "category": "Kilo Code"
+      }
+    ],
+    "configuration": {
+      "title": "Kilo Code",
+      "properties": {
+        "kilo-code.new.language": {
+          "type": "string",
+          "default": "",
+          "description": "Override the UI language for Kilo Code. Empty means use VS Code's display language."
+        },
+        "kilo-code.new.model.providerID": {
+          "type": "string",
+          "default": "kilo",
+          "description": "Default model provider ID for new sessions"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kilocode/kilo-i18n": "workspace:*",
+    "@kilocode/kilo-ui": "workspace:*",
+    "@kilocode/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2",
+    "esbuild-plugin-solid": "^0.6.0",
+    "typescript": "^5.9.3"
+  }
+}

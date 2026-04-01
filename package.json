@@ -1,0 +1,23 @@
+{
+  "name": "kilo-vscode-merged",
+  "version": "0.0.1",
+  "private": true,
+  "description": "VS Code + KiloCode merged workspace",
+  "scripts": {
+    "install:all": "npm --prefix vscode install && bun --cwd kilocode install",
+    "install:vscode": "npm --prefix vscode install",
+    "install:kilocode": "bun --cwd kilocode install",
+    "build:kilocode": "cd kilocode && bun turbo build",
+    "build:extension": "cd vscode && npm run gulp compile-kilo-code-extension",
+    "build:vscode": "cd vscode && npm run compile",
+    "build:all": "npm run build:kilocode && npm run build:extension && npm run build:vscode",
+    "typecheck:kilocode": "cd kilocode && bun turbo typecheck",
+    "typecheck:vscode": "cd vscode && npm run compile-check-ts-native",
+    "watch:kilocode": "cd kilocode && bun turbo dev",
+    "watch:vscode": "cd vscode && npm run watch",
+    "test:kilocode": "cd kilocode/packages/opencode && bun test",
+    "test:vscode": "cd vscode && npm run test-node",
+    "lint:kilocode": "cd kilocode && bun turbo lint",
+    "lint:vscode": "cd vscode && npm run eslint"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "outDir": "out",
+    "rootDir": "src",
+    "sourceMap": true,
+    "types": [
+      "vscode"
+    ],
+    "paths": {
+      "@kilocode/sdk": ["./packages/sdk/src"],
+      "@kilocode/kilo-i18n": ["./packages/kilo-i18n/src"],
+      "@kilocode/kilo-ui/*": ["./packages/kilo-ui/src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "packages",
+    "out",
+    "dist"
+  ]
+}
