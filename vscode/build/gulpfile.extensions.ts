@@ -25,7 +25,6 @@ import { createTsgoStream, spawnTsgo } from './lib/tsgo.ts';
 import * as util from './lib/util.ts';
 import watcher from './lib/watch/index.ts';
 import { compileKiloCodeExtensionTask, watchKiloCodeExtensionTask } from './gulpfile.kilo-code.ts';
-import { compileKiloCodeExtensionTask, watchKiloCodeExtensionTask } from './gulpfile.kilo-code.ts';
 
 const root = path.dirname(import.meta.dirname);
 const commit = getVersion(root);
