@@ -24,6 +24,7 @@ import * as tsb from './lib/tsb/index.ts';
 import { createTsgoStream, spawnTsgo } from './lib/tsgo.ts';
 import * as util from './lib/util.ts';
 import watcher from './lib/watch/index.ts';
+import { compileKiloCodeExtensionTask, watchKiloCodeExtensionTask } from './gulpfile.kilo-code.ts';
 
 const root = path.dirname(import.meta.dirname);
 const commit = getVersion(root);
@@ -231,10 +232,16 @@ const tasks = compilations.map(function (tsconfigFile) {
 const transpileExtensionsTask = task.define('transpile-extensions', task.parallel(...tasks.map(t => t.transpileTask)));
 gulp.task(transpileExtensionsTask);
 
-export const compileExtensionsTask = task.define('compile-extensions', task.parallel(...tasks.map(t => t.compileTask)));
+export const compileExtensionsTask = task.define('compile-extensions', task.series(
+	compileKiloCodeExtensionTask,
+	task.parallel(...tasks.map(t => t.compileTask))
+));
 gulp.task(compileExtensionsTask);
 
-export const watchExtensionsTask = task.define('watch-extensions', task.parallel(...tasks.map(t => t.watchTask)));
+export const watchExtensionsTask = task.define('watch-extensions', task.parallel(
+	watchKiloCodeExtensionTask,
+	...tasks.map(t => t.watchTask)
+));
 gulp.task(watchExtensionsTask);
 
 //#region Extension media

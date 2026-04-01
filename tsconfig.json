@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    { "path": "vscode/src/tsconfig.json" },
+    { "path": "vscode/extensions/kilo-code/tsconfig.json" },
+    { "path": "kilocode/tsconfig.json" }
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "incremental": true
+  }
+}
