@@ -1,0 +1,333 @@
+name: Merged Build & CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 'convoy/*'
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Install Dependencies
+    runs-on: ubuntu-22.04
+    outputs:
+      vscode-cache-hit: ${{ steps.vscode-cache.outputs.cache-hit }}
+      kilocode-cache-hit: ${{ steps.kilocode-cache.outputs.cache-hit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache VS Code node_modules
+        id: vscode-cache
+        uses: actions/cache@v5
+        with:
+          path: vscode/node_modules
+          key: vscode-node-modules-${{ hashFiles('vscode/package-lock.json') }}
+
+      - name: Cache KiloCode node_modules
+        id: kilocode-cache
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+
+      - name: Install VS Code dependencies
+        if: steps.vscode-cache.outputs.cache-hit != 'true'
+        working-directory: vscode
+        run: |
+          set -e
+          for i in {1..3}; do
+            npm ci && break
+            if [ $i -eq 3 ]; then
+              echo "NPM install failed" >&2
+              exit 1
+            fi
+            echo "NPM install failed $i, retrying..."
+          done
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install KiloCode dependencies
+        if: steps.kilocode-cache.outputs.cache-hit != 'true'
+        working-directory: kilocode
+        run: bun install
+
+  typecheck:
+    name: Type Check
+    needs: install
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore VS Code node_modules
+        uses: actions/cache@v5
+        with:
+          path: vscode/node_modules
+          key: vscode-node-modules-${{ hashFiles('vscode/package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Type check VS Code
+        working-directory: vscode
+        run: npm run compile-check-ts-native
+
+      - name: Type check KiloCode
+        working-directory: kilocode
+        run: bun turbo typecheck
+
+  kilocode-build:
+    name: Build KiloCode Packages
+    needs: install
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Build KiloCode packages
+        working-directory: kilocode
+        run: bun turbo build
+
+  extension-build:
+    name: Build Kilo Code Extension
+    needs: [install, kilocode-build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore VS Code node_modules
+        uses: actions/cache@v5
+        with:
+          path: vscode/node_modules
+          key: vscode-node-modules-${{ hashFiles('vscode/package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Build Kilo Code extension
+        working-directory: vscode
+        run: npm run gulp compile-kilo-code-extension
+
+  vscode-build:
+    name: Build VS Code
+    needs: [install, extension-build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install build tools
+        run: sudo apt update -y && sudo apt install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev
+
+      - name: Restore VS Code node_modules
+        uses: actions/cache@v5
+        with:
+          path: vscode/node_modules
+          key: vscode-node-modules-${{ hashFiles('vscode/package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Compile VS Code
+        working-directory: vscode
+        run: npm run compile
+
+      - name: Run hygiene checks
+        working-directory: vscode
+        run: npm run hygiene
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  kilocode-tests:
+    name: KiloCode Tests
+    needs: [install, kilocode-build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Run KiloCode tests
+        working-directory: kilocode/packages/opencode
+        run: bun test
+
+  vscode-tests:
+    name: VS Code Tests
+    needs: [install, vscode-build]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install build tools
+        run: sudo apt update -y && sudo apt install -y build-essential pkg-config libx11-dev libx11-xcb-dev libxkbfile-dev libnotify-bin libkrb5-dev xvfb
+
+      - name: Restore VS Code node_modules
+        uses: actions/cache@v5
+        with:
+          path: vscode/node_modules
+          key: vscode-node-modules-${{ hashFiles('vscode/package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Run VS Code node tests
+        working-directory: vscode
+        run: npm run test-node
+
+  lint:
+    name: Lint
+    needs: install
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: vscode/.nvmrc
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Restore VS Code node_modules
+        uses: actions/cache@v5
+        with:
+          path: vscode/node_modules
+          key: vscode-node-modules-${{ hashFiles('vscode/package-lock.json') }}
+          fail-on-cache-miss: true
+
+      - name: Restore KiloCode node_modules
+        uses: actions/cache@v5
+        with:
+          path: kilocode/node_modules
+          key: kilocode-node-modules-${{ hashFiles('kilocode/bun.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Lint VS Code
+        working-directory: vscode
+        run: npm run eslint
+
+      - name: Lint KiloCode
+        working-directory: kilocode
+        run: bun turbo lint

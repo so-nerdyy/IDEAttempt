@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import gulp from 'gulp';
@@ -11,11 +11,14 @@ const kiloCodeExtPath = path.join(root, 'extensions', 'kilo-code');
 const kilocodeRoot = path.join(root, '..', 'kilocode');
 const kilocodeOut = path.join(kiloCodeExtPath, 'out');
 const kilocodeDist = path.join(kiloCodeExtPath, 'dist');
+const kilocodeWebviewUi = path.join(kiloCodeExtPath, 'webview-ui');
 
 const KILOCODE_PACKAGES = [
 	'kilo-i18n',
 	'kilo-ui',
 	'sdk',
+	'kilo-gateway',
+	'kilo-telemetry',
 ];
 
 function runBun(args: string[], cwd: string): Promise<void> {
@@ -49,20 +52,30 @@ const compileKiloCodePackagesTask = task.define('compile-kilocode-packages', asy
 		await runBun(['install'], kilocodeRoot);
 	}
 
-	for (const pkg of KILOCODE_PACKAGES) {
-		const pkgPath = path.join(kilocodeRoot, 'packages', pkg);
-		if (fs.existsSync(path.join(pkgPath, 'package.json'))) {
-			fancyLog(`Building ${pkg}...`);
-			const pkgJson = JSON.parse(fs.readFileSync(path.join(pkgPath, 'package.json'), 'utf8'));
-			if (pkgJson.scripts?.build) {
-				await runBun(['run', 'build'], pkgPath);
-			} else if (pkgJson.scripts?.compile) {
-				await runBun(['run', 'compile'], pkgPath);
-			}
-		}
-	}
+	await runBun(['turbo', 'build'], kilocodeRoot);
 
 	fancyLog('KiloCode packages compiled.');
+});
+
+const bundleKiloCodeWebviewAssetsTask = task.define('bundle-kilocode-webview-assets', () => {
+	fancyLog('Bundling KiloCode webview assets...');
+
+	const webviewSrc = path.join(kiloCodeExtPath, 'webview-ui');
+	const webviewDest = path.join(kilocodeDist, 'webview-ui');
+
+	if (fs.existsSync(webviewSrc)) {
+		if (!fs.existsSync(kilocodeDist)) {
+			fs.mkdirSync(kilocodeDist, { recursive: true });
+		}
+
+		return gulp.src([
+			path.join(webviewSrc, '**', '*.{html,js,css,png,svg,json}'),
+		], { base: webviewSrc })
+			.pipe(gulp.dest(webviewDest));
+	}
+
+	fancyLog('No webview-ui directory found, skipping.');
+	return Promise.resolve();
 });
 
 const compileKiloCodeExtensionTask = task.define('compile-kilo-code-extension', task.series(
@@ -70,7 +83,7 @@ const compileKiloCodeExtensionTask = task.define('compile-kilo-code-extension', 
 	task.define('kilo-code-extension-build', async () => {
 		fancyLog('Building Kilo Code extension...');
 
-		const esbuildScript = path.join(kiloCodeExtPath, 'esbuild.mjs');
+		const esbuildScript = path.join(kiloCodeExtPath, 'esbuild.js');
 		if (fs.existsSync(esbuildScript)) {
 			await runBun(['run', esbuildScript], kiloCodeExtPath);
 		} else {
@@ -80,6 +93,7 @@ const compileKiloCodeExtensionTask = task.define('compile-kilo-code-extension', 
 
 		fancyLog('Kilo Code extension built.');
 	}),
+	bundleKiloCodeWebviewAssetsTask,
 ));
 
 gulp.task(compileKiloCodeExtensionTask);
@@ -95,7 +109,12 @@ const watchKiloCodeExtensionTask = task.define('watch-kilo-code-extension', () =
 		async () => {
 			fancyLog('Rebuilding Kilo Code extension...');
 			try {
-				await runBun(['x', 'tsc', '-p', 'tsconfig.json'], kiloCodeExtPath);
+				const esbuildScript = path.join(kiloCodeExtPath, 'esbuild.js');
+				if (fs.existsSync(esbuildScript)) {
+					await runBun(['run', esbuildScript], kiloCodeExtPath);
+				} else {
+					await runBun(['x', 'tsc', '-p', 'tsconfig.json'], kiloCodeExtPath);
+				}
 			} catch (err) {
 				fancyLog('Build error:', err);
 			}
