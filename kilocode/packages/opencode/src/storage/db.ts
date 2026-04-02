@@ -1,6 +1,4 @@
-import { Database as BunDatabase } from "bun:sqlite"
-import { drizzle, type SQLiteBunDatabase } from "drizzle-orm/bun-sqlite"
-import { migrate } from "drizzle-orm/bun-sqlite/migrator"
+// kilocode_change - conditional database driver for Node.js vs Bun
 import { type SQLiteTransaction } from "drizzle-orm/sqlite-core"
 export * from "drizzle-orm"
 import { Context } from "../util/context"
@@ -32,12 +30,10 @@ export namespace Database {
   type Schema = typeof schema
   export type Transaction = SQLiteTransaction<"sync", void, Schema>
 
-  type Client = SQLiteBunDatabase<Schema>
-
   type Journal = { sql: string; timestamp: number; name: string }[]
 
   const state = {
-    sqlite: undefined as BunDatabase | undefined,
+    sqlite: undefined as unknown,
   }
 
   function time(tag: string) {
@@ -73,8 +69,55 @@ export namespace Database {
     return sql.sort((a, b) => a.timestamp - b.timestamp)
   }
 
+  // kilocode_change - conditional database client for Node.js vs Bun
   export const Client = lazy(() => {
     log.info("opening database", { path: Path })
+
+    const isNode = process.env.KILO_PLATFORM === "vscode" || typeof Bun === "undefined"
+    
+    if (isNode) {
+      // Node.js path: use better-sqlite3
+      const { Database: BetterDatabase } = require("better-sqlite3")
+      const { drizzle } = require("drizzle-orm/better-sqlite3")
+      const { migrate } = require("drizzle-orm/better-sqlite3/migrator")
+      
+      const sqlite = new BetterDatabase(Path)
+      state.sqlite = sqlite
+
+      sqlite.pragma("journal_mode = WAL")
+      sqlite.pragma("synchronous = NORMAL")
+      sqlite.pragma("busy_timeout = 5000")
+      sqlite.pragma("cache_size = -64000")
+      sqlite.pragma("foreign_keys = ON")
+      sqlite.pragma("wal_checkpoint(PASSIVE)")
+
+      const db = drizzle({ client: sqlite, schema })
+
+      const entries =
+        typeof KILO_MIGRATIONS !== "undefined"
+          ? KILO_MIGRATIONS
+          : migrations(path.join(__dirname, "../../migration"))
+          
+      if (entries.length > 0) {
+        log.info("applying migrations", {
+          count: entries.length,
+          mode: typeof KILO_MIGRATIONS !== "undefined" ? "bundled" : "dev",
+        })
+        if (Flag.KILO_SKIP_MIGRATIONS) {
+          for (const item of entries) {
+            item.sql = "select 1;"
+          }
+        }
+        migrate(db, entries)
+      }
+
+      return db
+    }
+    
+    // Bun path: use bun:sqlite
+    const { Database: BunDatabase } = require("bun:sqlite")
+    const { drizzle } = require("drizzle-orm/bun-sqlite")
+    const { migrate } = require("drizzle-orm/bun-sqlite/migrator")
 
     const sqlite = new BunDatabase(Path, { create: true })
     state.sqlite = sqlite
@@ -88,11 +131,11 @@ export namespace Database {
 
     const db = drizzle({ client: sqlite, schema })
 
-    // Apply schema migrations
     const entries =
       typeof KILO_MIGRATIONS !== "undefined"
         ? KILO_MIGRATIONS
         : migrations(path.join(import.meta.dirname, "../../migration"))
+        
     if (entries.length > 0) {
       log.info("applying migrations", {
         count: entries.length,
@@ -110,14 +153,14 @@ export namespace Database {
   })
 
   export function close() {
-    const sqlite = state.sqlite
-    if (!sqlite) return
+    const sqlite = state.sqlite as { close?: () => void } | undefined
+    if (!sqlite?.close) return
     sqlite.close()
     state.sqlite = undefined
     Client.reset()
   }
 
-  export type TxOrDb = Transaction | Client
+  export type TxOrDb = Transaction | ReturnType<typeof Client>
 
   const ctx = Context.create<{
     tx: TxOrDb

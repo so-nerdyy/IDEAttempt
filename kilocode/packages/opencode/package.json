@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.28.4",
+    "@types/better-sqlite3": "^7.6.11",
     "@octokit/webhooks-types": "7.6.1",
     "@opencode-ai/script": "workspace:*",
     "@parcel/watcher-darwin-arm64": "2.5.1",
@@ -56,6 +57,7 @@
   },
   "dependencies": {
     "@actions/core": "1.11.1",
+    "better-sqlite3": "^11.0.0",
     "@actions/github": "6.0.1",
     "@agentclientprotocol/sdk": "0.14.1",
     "@ai-sdk/amazon-bedrock": "3.0.82",

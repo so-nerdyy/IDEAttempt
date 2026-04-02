@@ -61,7 +61,7 @@ export interface IKiloAIService {
 
 	sessionPrompt(input: PromptInput): Promise<AsyncIterableIterator<MessagePart>>;
 	sessionPromptAsync(input: { sessionID: string; directory: string; parts: PromptPart[] }): Promise<void>;
-	sessionCommand(input: { sessionID: string; directory: string; command: string }): Promise<void>;
+	sessionCommand(input: { sessionID: string; directory: string; command: string; arguments?: string }): Promise<void>;
 
 	// --- Auth operations (backed by VS Code SecretStorage) ---
 
