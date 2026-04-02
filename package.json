@@ -1,0 +1,31 @@
+{
+  "name": "kilo-vscode-merged",
+  "version": "0.0.1",
+  "private": true,
+  "description": "VS Code + KiloCode merged workspace",
+  "scripts": {
+    "install:all": "npm --prefix vscode install && bun --cwd kilocode install",
+    "install:vscode": "npm --prefix vscode install",
+    "install:kilocode": "bun --cwd kilocode install",
+    "compile": "npm run build:kilocode && npm run build:extension && npm run build:vscode",
+    "build:kilocode": "cd kilocode && bun turbo build",
+    "build:extension": "cd vscode && npm run gulp compile-kilo-code-extension",
+    "build:vscode": "cd vscode && npm run compile",
+    "build:all": "npm run build:kilocode && npm run build:extension && npm run build:vscode",
+    "typecheck": "npm run typecheck:kilocode && npm run typecheck:vscode",
+    "typecheck:kilocode": "cd kilocode && bun turbo typecheck",
+    "typecheck:vscode": "cd vscode && npm run compile-check-ts-native",
+    "watch": "npm run watch:kilocode & npm run watch:vscode",
+    "watch:kilocode": "cd kilocode && bun turbo dev",
+    "watch:vscode": "cd vscode && npm run watch",
+    "test": "npm run test:kilocode && npm run test:vscode",
+    "test:kilocode": "cd kilocode/packages/opencode && bun test",
+    "test:vscode": "cd vscode && npm run test-node",
+    "test:integration": "cd vscode && npm run test-extension",
+    "lint": "npm run lint:kilocode && npm run lint:vscode",
+    "lint:kilocode": "cd kilocode && bun turbo lint",
+    "lint:vscode": "cd vscode && npm run eslint",
+    "vsix:package": "cd vscode && npm run gulp vscode-linux-x64",
+    "clean": "rm -rf vscode/out vscode/.build kilocode/packages/*/dist kilocode/packages/*/out"
+  }
+}

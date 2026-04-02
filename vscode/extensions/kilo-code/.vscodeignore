@@ -1,0 +1,16 @@
+.vscode/
+.vscode-test.mjs
+.vscode-test.js
+src/**/*.ts
+!src/**/*.d.ts
+webview-ui/
+**/*.map
+**/*.ts
+!dist/
+out/
+tests/
+tsconfig.json
+esbuild.js
+.bunfig.toml
+node_modules/
+packages/
