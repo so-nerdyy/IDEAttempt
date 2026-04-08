@@ -6,9 +6,6 @@
     "outDir": "out",
     "rootDir": "src",
     "sourceMap": true,
-    "types": [
-      "vscode"
-    ],
     "paths": {
       "@kilocode/sdk": ["./packages/sdk/src"],
       "@kilocode/sdk/*": ["./packages/sdk/src/*"],
@@ -18,7 +15,8 @@
     }
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../../src/vscode-dts/vscode.d.ts"
   ],
   "exclude": [
     "node_modules",
