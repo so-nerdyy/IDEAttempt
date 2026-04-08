@@ -3,24 +3,34 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "outDir": "out",
-    "rootDir": "src",
     "sourceMap": true,
+    "moduleResolution": "node",
     "types": [
+      "node",
       "vscode"
     ],
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "strictNullChecks": false,
     "paths": {
-      "@kilocode/sdk": ["./packages/sdk/src"],
-      "@kilocode/kilo-i18n": ["./packages/kilo-i18n/src"],
-      "@kilocode/kilo-ui/*": ["./packages/kilo-ui/src/*"]
+      "@kilocode/sdk/*": ["./packages/sdk/src/*"],
+      "@kilocode/sdk": ["./packages/sdk/src/index.ts"]
     }
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "packages/sdk/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "packages",
     "out",
     "dist"
   ]

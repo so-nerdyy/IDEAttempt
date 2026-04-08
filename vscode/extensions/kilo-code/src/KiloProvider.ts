@@ -472,7 +472,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
             )
             .optional()
             .catch(undefined)
-            .parse(message.files)
+            .parse(message.files) as Array<{ mime: string; url: string }> | undefined
           await this.handleSendMessage(
             message.text,
             typeof message.messageID === "string" ? message.messageID : undefined,
@@ -495,7 +495,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
             )
             .optional()
             .catch(undefined)
-            .parse(message.files)
+            .parse(message.files) as Array<{ mime: string; url: string }> | undefined
           await this.handleSendCommand(
             message.command,
             message.arguments,
@@ -796,7 +796,7 @@ export class KiloProvider implements vscode.WebviewViewProvider, TelemetryProper
             )
             .optional()
             .catch(undefined)
-            .parse(message.files)
+            .parse(message.files) as Array<{ mime: string; url: string }> | undefined
           void handleImportAndSend(
             this.cloudSessionCtx,
             message.cloudSessionId,

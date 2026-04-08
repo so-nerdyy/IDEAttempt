@@ -1,4 +1,4 @@
-import { ToolDefinition, ToolResult, ToolExecutionContext } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
 
 export const CodeSearchTool: ToolDefinition = {
 	id: 'codesearch',
@@ -35,7 +35,7 @@ export const CodeSearchTool: ToolDefinition = {
 			throw new Error(`CodeSearch failed: HTTP ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data = await response.json() as { result?: { content?: Array<{ text?: string }> } };
 		const content = data.result?.content?.[0]?.text || 'No code context found.';
 
 		return {

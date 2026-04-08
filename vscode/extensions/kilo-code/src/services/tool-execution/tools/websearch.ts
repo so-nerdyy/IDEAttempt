@@ -1,4 +1,4 @@
-import { ToolDefinition, ToolResult, ToolExecutionContext } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
 
 export const WebSearchTool: ToolDefinition = {
 	id: 'websearch',
@@ -48,7 +48,7 @@ export const WebSearchTool: ToolDefinition = {
 			throw new Error(`WebSearch failed: HTTP ${response.status}`);
 		}
 
-		const data = await response.json();
+		const data = await response.json() as { result?: { content?: Array<{ text?: string }> } };
 		const results = data.result?.content?.[0]?.text
 			? JSON.parse(data.result.content[0].text)
 			: [];

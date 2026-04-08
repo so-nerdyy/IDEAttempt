@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
-import { KiloProvider } from "./KiloProvider"
-import type { KiloConnectionService } from "./services/cli-backend"
+import { KiloProvider } from "../KiloProvider"
+import type { KiloConnectionService } from "../services/cli-backend"
 
 /**
  * Opens a read-only editor panel to view a sub-agent session.

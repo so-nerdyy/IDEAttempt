@@ -120,19 +120,19 @@ export async function continueInWorktree(
 
   progress("capturing", "Capturing git changes...")
   const captured = await captureState(ctx)
-  if (!captured.ok) return progress("error", undefined, captured.error)
+  if (!captured.ok) return progress("error", undefined, (captured as { ok: false; error: string }).error)
 
   progress("creating", "Creating worktree...")
   const prepared = await prepareWorktree(ctx, captured.value.branch)
-  if (!prepared.ok) return progress("error", undefined, prepared.error)
+  if (!prepared.ok) return progress("error", undefined, (prepared as { ok: false; error: string }).error)
 
   progress("transferring", "Transferring changes...")
   const transferred = await transferState(ctx, captured.value, prepared.value.result.path)
-  if (!transferred.ok) return progress("error", undefined, transferred.error)
+  if (!transferred.ok) return progress("error", undefined, (transferred as { ok: false; error: string }).error)
 
   progress("forking", "Starting session...")
   const forked = await forkSession(ctx, sessionId, prepared.value.result.path)
-  if (!forked.ok) return progress("error", undefined, forked.error)
+  if (!forked.ok) return progress("error", undefined, (forked as { ok: false; error: string }).error)
 
   registerSession(ctx, forked.value, prepared.value.result, prepared.value.worktreeId, sessionId)
   progress("done")

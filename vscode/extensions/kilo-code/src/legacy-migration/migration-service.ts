@@ -260,7 +260,7 @@ export async function migrate(
     for (const id of selections.sessions) {
       onProgress(id, "migrating")
       const result = await migrateSession(id, context, client)
-      const reason = result.ok ? "Session migrated" : result.message
+      const reason = result.ok ? "Session migrated" : (result as { ok: false; message: string }).message
       results.push({
         item: id,
         category: "session",

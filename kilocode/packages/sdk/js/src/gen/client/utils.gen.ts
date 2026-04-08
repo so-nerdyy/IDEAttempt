@@ -169,7 +169,7 @@ export const mergeHeaders = (...headers: Array<Required<Config>["headers"] | und
       continue
     }
 
-    const iterator = header instanceof Headers ? header.entries() : Object.entries(header)
+    const iterator = header instanceof Headers ? (header as any).entries() : Object.entries(header)
 
     for (const [key, value] of iterator) {
       if (value === null) {
