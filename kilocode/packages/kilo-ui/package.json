@@ -89,19 +89,23 @@
     "./audio/*": "./src/assets/audio/*"
   },
   "peerDependencies": {
-    "@opencode-ai/ui": "workspace:*",
-    "solid-js": "catalog:"
+    "solid-js": ">=1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "solid-js": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@playwright/test": "1.57.0",
     "@storybook/addon-a11y": "10.2.10",
     "@storybook/addon-docs": "10.2.10",
     "@storybook/addon-themes": "10.2.10",
-    "@tsconfig/node22": "catalog:",
-    "@types/bun": "catalog:",
+    "@tsconfig/node22": "^22.0.0",
+    "@types/bun": "^1.2.0",
     "storybook": "10.2.10",
     "storybook-solidjs-vite": "10.0.9",
-    "typescript": "catalog:",
+    "typescript": "^5.9.3",
     "vite": "7.3.1",
     "vite-plugin-solid": "2.11.10"
   },
@@ -113,8 +117,7 @@
   },
   "dependencies": {
     "@kobalte/core": "0.13.11",
-    "@opencode-ai/util": "workspace:*",
-    "@pierre/diffs": "catalog:",
+    "@pierre/diffs": "^1.0.0",
     "@solid-primitives/lifecycle": "0.1.2",
     "@solid-primitives/media": "2.3.3",
     "@solid-primitives/resize-observer": "2.1.5",

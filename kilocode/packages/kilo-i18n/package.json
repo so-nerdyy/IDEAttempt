@@ -10,11 +10,5 @@
   },
   "scripts": {
     "typecheck": "tsgo --noEmit"
-  },
-  "devDependencies": {
-    "@tsconfig/node22": "catalog:",
-    "@types/bun": "catalog:",
-    "typescript": "catalog:",
-    "@typescript/native-preview": "catalog:"
   }
 }
