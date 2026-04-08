@@ -16,22 +16,33 @@ import { registerCommitMessageService } from "./services/commit-message"
 import { registerCodeActions, registerTerminalActions, KiloCodeActionProvider } from "./services/code-actions"
 import { registerToggleAutoApprove } from "./commands/toggle-auto-approve"
 import { createToolExecutionService } from "./services/tool-execution"
+import { ToolWebviewBridge } from "./services/tool-execution/tool-webview-bridge"
 
+// Activated via "onStartupFinished" (package.json) so that commands, code actions, keybindings,
+// autocomplete, commit-message generation, and URI deep links all work immediately — without
+// requiring the user to open a Kilo sidebar or panel first. The CLI backend is NOT spawned here;
+// it starts lazily when a webview connects or when ensureBackendForAutocomplete() triggers it.
 export function activate(context: vscode.ExtensionContext) {
 	console.log("Kilo Code extension is now active")
 
 	const telemetry = TelemetryProxy.getInstance()
 
+	// Get workspace root for tool execution boundaries
 	const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd()
 
+	// Create tool execution service with permission system
 	const { service: toolExecutionService, permissionService: toolPermissionService } =
 		createToolExecutionService(context, workspaceRoot)
 
+	// Create shared connection service (one server for all webviews)
 	const connectionService = new KiloConnectionService(context)
 
+	// Create browser automation service (manages Playwright MCP registration)
 	const browserAutomationService = new BrowserAutomationService(connectionService)
 	browserAutomationService.syncWithSettings()
 
+	// Re-register browser automation MCP server on CLI backend reconnect, configure telemetry,
+	// and reload autocomplete so it picks up the now-available backend connection.
 	const unsubscribeStateChange = connectionService.onStateChange((state) => {
 		if (state === "connected") {
 			browserAutomationService.reregisterIfEnabled()
@@ -43,24 +54,34 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	})
 
+	// Create the provider with shared service
 	const provider = new KiloProvider(context.extensionUri, connectionService, context)
 
+	// Register the webview view provider for the sidebar.
+	// retainContextWhenHidden keeps the webview alive when switching to other sidebar panels.
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider(KiloProvider.viewType, provider, {
 			webviewOptions: { retainContextWhenHidden: true },
 		}),
 	)
 
+	// Ensure Agent Manager keybindings work when a VS Code terminal has focus.
+	// The terminal intercepts all keystrokes unless the command is listed in
+	// terminal.integrated.commandsToSkipShell, which only contains built-in
+	// commands by default.
 	ensureCommandsSkipShell(["kilo-code.new.agentManagerOpen", "kilo-code.new.agentManager.showTerminal"])
 
+	// Create Agent Manager provider for editor panel
 	const agentManagerHost = new VscodeHost(context.extensionUri, connectionService, context)
 	const agentManagerProvider = new AgentManagerProvider(agentManagerHost, connectionService)
 	context.subscriptions.push(agentManagerProvider)
 
+	// Wire "Continue in Worktree" from sidebar → Agent Manager
 	provider.setContinueInWorktreeHandler((sessionId, progress) =>
 		agentManagerProvider.continueFromSidebar(sessionId, progress),
 	)
 
+	// Register serializer so Agent Manager restores when VS Code restarts
 	context.subscriptions.push(
 		vscode.window.registerWebviewPanelSerializer(AgentManagerProvider.viewType, {
 			deserializeWebviewPanel(panel: vscode.WebviewPanel) {
@@ -73,6 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}),
 	)
 
+	// Register serializer so "Open in Tab" restores when VS Code restarts
 	context.subscriptions.push(
 		vscode.window.registerWebviewPanelSerializer("kilo-code.new.TabPanel", {
 			deserializeWebviewPanel(panel: vscode.WebviewPanel) {
@@ -94,18 +116,22 @@ export function activate(context: vscode.ExtensionContext) {
 		}),
 	)
 
+	// Create standalone diff viewer provider for the sidebar "Show Changes" action
 	const diffViewerProvider = new DiffViewerProvider(context.extensionUri, connectionService)
 	diffViewerProvider.setCommentHandler((comments, autoSend) => {
 		void provider.appendReviewComments(comments, autoSend)
 	})
 	context.subscriptions.push(diffViewerProvider)
 
+	// Create settings/profile editor provider (opens in editor area, not sidebar)
 	const settingsEditorProvider = new SettingsEditorProvider(context.extensionUri, connectionService, context)
 	context.subscriptions.push(settingsEditorProvider)
 
+	// Create sub-agent viewer provider (read-only editor panel for sub-agent sessions)
 	const subAgentViewerProvider = new SubAgentViewerProvider(context.extensionUri, connectionService, context)
 	context.subscriptions.push(subAgentViewerProvider)
 
+	// Register serializers so settings/diff/sub-agent panels restore on restart
 	const settingsViews = ["settingsPanel", "profilePanel", "marketplacePanel"] as const
 	for (const suffix of settingsViews) {
 		context.subscriptions.push(
@@ -130,12 +156,15 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.window.registerWebviewPanelSerializer("kilo-code.new.SubAgentViewerPanel", {
 			deserializeWebviewPanel(panel: vscode.WebviewPanel) {
+				// Sub-agent viewer requires a session ID that can't be recovered
+				// after restart, so dispose the stale panel cleanly.
 				panel.dispose()
 				return Promise.resolve()
 			},
 		}),
 	)
 
+	// Register toolbar button command handlers
 	context.subscriptions.push(
 		vscode.commands.registerCommand("kilo-code.new.plusButtonClicked", () => {
 			provider.postMessage({ type: "action", action: "plusButtonClicked" })
@@ -163,9 +192,11 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand("kilo-code.new.settingsButtonClicked", (tab?: string) => {
 			settingsEditorProvider.openPanel("settings", tab)
 		}),
+		// legacy-migration start
 		vscode.commands.registerCommand("kilo-code.new.openMigrationWizard", () => {
 			provider.postMessage({ type: "migrationState", needed: true })
 		}),
+		// legacy-migration end
 		vscode.commands.registerCommand("kilo-code.new.generateTerminalCommand", async () => {
 			const input = await vscode.window.showInputBox({
 				prompt: "Describe the terminal command you want to generate",
@@ -232,6 +263,7 @@ export function activate(context: vscode.ExtensionContext) {
 		),
 	)
 
+	// Register tool execution command for VS Code native tool path
 	context.subscriptions.push(
 		vscode.commands.registerCommand("kilo-code.tool.execute", async (params: {
 			sessionId: string;
@@ -250,6 +282,7 @@ export function activate(context: vscode.ExtensionContext) {
 					messageId,
 					abortController.signal,
 					(metadata) => {
+						// Stream metadata updates to all subscribed webviews
 						provider.postMessage({
 							type: "tool.stream",
 							sessionId,
@@ -280,6 +313,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}),
 	)
 
+	// Register URI handler for session imports (vscode://kilocode.kilo-code/kilocode/s/{sessionId})
 	context.subscriptions.push(
 		vscode.window.registerUriHandler({
 			async handleUri(uri: vscode.Uri) {
@@ -293,12 +327,16 @@ export function activate(context: vscode.ExtensionContext) {
 		}),
 	)
 
+	// Register autocomplete provider
 	registerAutocompleteProvider(context, connectionService)
 
+	// Start the CLI backend server eagerly so autocomplete works without opening a Kilo tab.
 	ensureBackendForAutocomplete(connectionService)
 
+	// Register commit message generation
 	registerCommitMessageService(context, connectionService)
 
+	// Register toggle auto-approve shortcut (Ctrl+Alt+A / Cmd+Alt+A)
 	const defaultDir = () => vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? process.cwd()
 	registerToggleAutoApprove(
 		context,
@@ -319,9 +357,11 @@ export function activate(context: vscode.ExtensionContext) {
 		},
 	)
 
+	// Register code actions (editor context menus, terminal context menus, keyboard shortcuts)
 	registerCodeActions(context, provider, agentManagerProvider)
 	registerTerminalActions(context, provider, agentManagerProvider)
 
+	// Register CodeActionProvider (lightbulb quick fixes)
 	context.subscriptions.push(
 		vscode.languages.registerCodeActionsProvider(
 			{ scheme: "file" },
@@ -330,6 +370,7 @@ export function activate(context: vscode.ExtensionContext) {
 		),
 	)
 
+	// Dispose services when extension deactivates (kills the server)
 	context.subscriptions.push({
 		dispose: () => {
 			unsubscribeStateChange()
@@ -377,6 +418,8 @@ async function openKiloInNewTab(
 	)
 	tabProvider.resolveWebviewPanel(panel)
 
+	// Wait for the new panel to become active before locking the editor group.
+	// This avoids the race where VS Code hasn't switched focus yet.
 	await waitForWebviewPanelToBeActive(panel)
 	await vscode.commands.executeCommand("workbench.action.lockEditorGroup")
 
@@ -390,9 +433,16 @@ async function openKiloInNewTab(
 	)
 }
 
+/**
+ * Add extension commands to terminal.integrated.commandsToSkipShell so they
+ * work when a VS Code terminal has focus. The setting only ships with built-in
+ * commands; extension commands must be added explicitly.
+ */
 function ensureCommandsSkipShell(commands: string[]): void {
 	const config = vscode.workspace.getConfiguration("terminal.integrated")
 	const info = config.inspect<string[]>("commandsToSkipShell")
+	// Update whichever scope already carries an override so we don't
+	// shadow workspace settings or leak workspace values into global.
 	const [existing, target] = info?.workspaceFolderValue
 		? [info.workspaceFolderValue, vscode.ConfigurationTarget.WorkspaceFolder]
 		: info?.workspaceValue
