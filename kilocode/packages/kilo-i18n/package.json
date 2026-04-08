@@ -12,9 +12,9 @@
     "typecheck": "tsgo --noEmit"
   },
   "devDependencies": {
-    "@tsconfig/node22": "catalog:",
-    "@types/bun": "catalog:",
-    "typescript": "catalog:",
-    "@typescript/native-preview": "catalog:"
+    "@tsconfig/node22": "22.0.2",
+    "@types/bun": "1.3.9",
+    "typescript": "5.8.2",
+    "@typescript/native-preview": "7.0.0-dev.20260316.1"
   }
 }

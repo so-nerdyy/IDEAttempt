@@ -68,9 +68,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@kilocode/kilo-i18n": "workspace:*",
-    "@kilocode/kilo-ui": "workspace:*",
-    "@kilocode/sdk": "workspace:*"
+    "@kilocode/kilo-i18n": "file:./packages/kilo-i18n",
+    "@kilocode/kilo-ui": "file:./packages/kilo-ui",
+    "@kilocode/sdk": "file:./packages/sdk"
   },
   "devDependencies": {
     "esbuild": "^0.27.2",
