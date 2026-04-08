@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from '../tool-execution-service';
 import { spawn } from '../../../util/process';
 
 export const BashTool: ToolDefinition = {
