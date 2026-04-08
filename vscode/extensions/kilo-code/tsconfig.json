@@ -11,7 +11,9 @@
     ],
     "paths": {
       "@kilocode/sdk": ["./packages/sdk/src"],
+      "@kilocode/sdk/*": ["./packages/sdk/src/*"],
       "@kilocode/kilo-i18n": ["./packages/kilo-i18n/src"],
+      "@kilocode/kilo-i18n/*": ["./packages/kilo-i18n/src/*"],
       "@kilocode/kilo-ui/*": ["./packages/kilo-ui/src/*"]
     }
   },
