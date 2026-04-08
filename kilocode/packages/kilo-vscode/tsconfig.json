@@ -5,9 +5,13 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
     "sourceMap": true,
-    "rootDir": "src",
     "strict": true /* enable all strict type-checking options */,
-    "types": ["node", "vscode", "mocha"]
+    "types": ["node", "vscode", "mocha"],
+    "baseUrl": ".",
+    "paths": {
+      "@kilocode/sdk/v2": ["../sdk/js/src/v2/index.ts"],
+      "@kilocode/sdk/v2/client": ["../sdk/js/src/v2/client.ts"]
+    }
     /* Additional Checks */
     // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
     // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
