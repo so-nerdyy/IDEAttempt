@@ -1,4 +1,4 @@
-import { ToolDefinition, ToolResult, ToolExecutionContext } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
 
 export const BatchTool: ToolDefinition = {
 	id: 'batch',
