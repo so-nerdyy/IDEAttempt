@@ -312,7 +312,7 @@ export class KiloConnectionService {
     }
   }
 
-  private async doConnect(workspaceDir: string): Promise<void> {
+  private async doConnect(_workspaceDir: string): Promise<void> {
     // If we reconnect, ensure the previous SSE connection is cleaned up first.
     this.stopHealthPoll()
     this.sseClient?.dispose()

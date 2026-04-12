@@ -35,7 +35,8 @@ import type {
   MigrationCustomModeInfo,
 } from "./legacy-types"
 import type { MigrationResultItem } from "./migration-types"
-import { createSessionID } from "./sessions/lib/ids"
+// createSessionID imported but not currently used
+// import { createSessionID } from "./sessions/lib/ids"
 import { migrate as migrateSession } from "./sessions/migrate"
 
 // ---------------------------------------------------------------------------

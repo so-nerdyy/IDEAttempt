@@ -750,7 +750,7 @@ export class WorktreeManager {
     }
   }
 
-  async derivedFallbackBranches(requested: string): Promise<string[]> {
+  async derivedFallbackBranches(_requested: string): Promise<string[]> {
     const defaults = []
     try {
       defaults.push(await this.defaultBranch())

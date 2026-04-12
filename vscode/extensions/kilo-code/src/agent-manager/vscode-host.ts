@@ -6,7 +6,7 @@
  */
 
 import * as vscode from "vscode"
-import type { Host, PanelContext, OutputHandle, SessionProvider, Disposable } from "./host"
+import type { Host, PanelContext, OutputHandle, SessionProvider } from "./host"
 import type { KiloConnectionService } from "../services/cli-backend"
 import { KiloProvider } from "../KiloProvider"
 import { buildWebviewHtml } from "../utils"

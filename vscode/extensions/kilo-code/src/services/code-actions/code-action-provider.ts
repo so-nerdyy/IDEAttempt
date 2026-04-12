@@ -6,7 +6,7 @@ export class KiloCodeActionProvider implements vscode.CodeActionProvider {
   }
 
   provideCodeActions(
-    document: vscode.TextDocument,
+    _document: vscode.TextDocument,
     range: vscode.Range | vscode.Selection,
     context: vscode.CodeActionContext,
   ): vscode.CodeAction[] {

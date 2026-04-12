@@ -238,7 +238,8 @@ export const createClient = (config: Config = {}): Client => {
     const { opts, url } = await beforeRequest(options)
     return createSseClient({
       ...opts,
-      body: opts.body as BodyInit | null | undefined,
+      // @ts-ignore BodyInit type mismatch in Node.js context
+      body: opts.body,
       headers: opts.headers as unknown as Record<string, string>,
       method,
       onRequest: async (url, init) => {
@@ -250,7 +251,8 @@ export const createClient = (config: Config = {}): Client => {
         }
         return request
       },
-      serializedBody: getValidRequestBody(opts) as BodyInit | null | undefined,
+      // @ts-ignore BodyInit type mismatch in Node.js context
+      serializedBody: getValidRequestBody(opts),
       url,
     })
   }

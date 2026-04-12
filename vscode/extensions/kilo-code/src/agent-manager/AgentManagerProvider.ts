@@ -25,7 +25,7 @@ import { resolveVersionModels, buildInitialMessages, type CreatedVersion } from 
 import { PLATFORM } from "./constants"
 import type { AgentManagerOutMessage, AgentManagerInMessage } from "./types"
 import { hashFileDiffs, resolveLocalDiffTarget } from "../review-utils"
-import type { Host, PanelContext, OutputHandle, SessionProvider, Disposable } from "./host"
+import type { Host, PanelContext, OutputHandle, Disposable } from "./host"
 
 /**
  * AgentManagerProvider opens the Agent Manager panel.

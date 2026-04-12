@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
+import { ToolDefinition, ToolResult } from '../tool-execution-service';
 
 export const QuestionTool: ToolDefinition = {
 	id: 'question',
@@ -8,7 +8,7 @@ export const QuestionTool: ToolDefinition = {
 	parameters: [
 		{ name: 'questions', type: 'array', description: 'Array of questions to ask the user', required: true },
 	],
-	async execute(args, ctx): Promise<ToolResult> {
+	async execute(args, _ctx): Promise<ToolResult> {
 		const questions = (args.questions as Array<{
 			question: string;
 			header?: string;

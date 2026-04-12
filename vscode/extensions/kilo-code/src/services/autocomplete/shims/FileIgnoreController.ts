@@ -1,5 +1,4 @@
 import ignore from "ignore"
-import * as vscode from "vscode"
 import * as path from "path"
 import * as fs from "fs"
 
@@ -35,7 +34,7 @@ export class FileIgnoreController {
       this.ig.add(patterns)
       SENSITIVE_PATTERNS.forEach((p) => this.ig!.add(p))
     } else {
-      SENSITIVE_PATTERNS.forEach((p) => this.ig.add(p))
+      SENSITIVE_PATTERNS.forEach((p) => this.ig!.add(p))
     }
 
     this.initialized = true

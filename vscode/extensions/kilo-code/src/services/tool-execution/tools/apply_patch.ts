@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from '../tool-execution-service';
+import { ToolDefinition, ToolResult, resolvePath } from '../tool-execution-service';
 import * as vscode from 'vscode';
 
 export const ApplyPatchTool: ToolDefinition = {

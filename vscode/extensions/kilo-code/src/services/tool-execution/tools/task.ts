@@ -1,5 +1,4 @@
-import * as vscode from 'vscode';
-import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
+import { ToolDefinition, ToolResult } from '../tool-execution-service';
 
 export const TaskTool: ToolDefinition = {
 	id: 'task',
@@ -14,7 +13,8 @@ export const TaskTool: ToolDefinition = {
 	],
 	async execute(args, ctx): Promise<ToolResult> {
 		const description = args.description as string;
-		const prompt = args.prompt as string;
+		// _prompt - not currently used in this stub
+		// const _prompt = args.prompt as string;
 		const subagentType = args.subagent_type as string;
 
 		const permResponse = await ctx.requestPermission({

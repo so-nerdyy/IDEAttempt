@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from '../tool-execution-service';
+import { ToolDefinition, ToolResult, resolvePath } from '../tool-execution-service';
 
 export const GlobTool: ToolDefinition = {
 	id: 'glob',

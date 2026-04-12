@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { spawn, ChildProcess } from 'child_process';
+import { ChildProcess } from 'child_process';
 
 export interface ToolParameter {
 	name: string;
@@ -137,7 +137,7 @@ export class ToolPermissionService {
 	clearState(): void {
 		this.permissionState.alwaysAllowed.clear();
 		this.permissionState.alwaysDenied.clear();
-		for (const [id, pending] of this.pendingRequests) {
+		for (const [_id, pending] of this.pendingRequests) {
 			pending.resolve('deny');
 		}
 		this.pendingRequests.clear();
@@ -151,7 +151,7 @@ export class ToolExecutionService {
 	readonly onExecutionEvent = this.onExecutionEventEmitter.event;
 
 	constructor(
-		private context: vscode.ExtensionContext,
+		_context: vscode.ExtensionContext,
 		private permissionService: ToolPermissionService,
 		private workspaceRoot: string,
 	) {}

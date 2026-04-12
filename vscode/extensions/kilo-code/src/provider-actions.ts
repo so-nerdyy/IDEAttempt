@@ -189,7 +189,7 @@ export async function disconnectProvider(
   ctx: ActionContext,
   requestId: string,
   providerID: string,
-  cachedConfigMessage: unknown,
+  _cachedConfigMessage: unknown,
   setCachedConfig: (msg: unknown) => void,
 ) {
   const id = validateID(ctx, requestId, providerID, "disconnect")
@@ -246,7 +246,7 @@ export async function saveCustomProvider(
   providerID: string,
   provider: Record<string, unknown>,
   apiKey: string | undefined,
-  cachedConfigMessage: unknown,
+  _cachedConfigMessage: unknown,
   setCachedConfig: (msg: unknown) => void,
 ) {
   const id = validateID(ctx, requestId, providerID, "connect")

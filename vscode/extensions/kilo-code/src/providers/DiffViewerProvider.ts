@@ -1,15 +1,14 @@
 import * as vscode from "vscode"
-import type { FileDiff } from "@kilocode/sdk/v2/client"
-import type { KiloConnectionService } from "./services/cli-backend"
-import { buildWebviewHtml } from "./utils"
-import { GitOps } from "./agent-manager/GitOps"
+import type { KiloConnectionService } from "../services/cli-backend"
+import { buildWebviewHtml } from "../utils"
+import { GitOps } from "../agent-manager/GitOps"
 import {
   appendOutput,
   getWorkspaceRoot,
   hashFileDiffs,
   openWorkspaceRelativeFile,
   resolveLocalDiffTarget,
-} from "./review-utils"
+} from "../review-utils"
 
 /**
  * DiffViewerProvider opens a full-screen diff viewer in an editor tab.

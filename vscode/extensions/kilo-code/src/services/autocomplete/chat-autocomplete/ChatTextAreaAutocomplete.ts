@@ -16,7 +16,7 @@ export class ChatTextAreaAutocomplete {
     captureAcceptSuggestion: (_length: number) => {},
   }
 
-  constructor(private connectionService: KiloConnectionService) {}
+  constructor(_connectionService: KiloConnectionService) {}
 
   async handle(message: ChatCompletionRequestMessage, sender: ChatCompletionResponseSender): Promise<void> {
     const text = message.text || ""

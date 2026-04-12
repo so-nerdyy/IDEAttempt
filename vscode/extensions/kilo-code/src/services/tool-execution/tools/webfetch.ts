@@ -1,4 +1,4 @@
-import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
+import { ToolDefinition, ToolResult } from '../tool-execution-service';
 
 export const WebFetchTool: ToolDefinition = {
 	id: 'webfetch',

@@ -1,4 +1,4 @@
-import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
+import { ToolDefinition, ToolResult } from '../tool-execution-service';
 
 export const BatchTool: ToolDefinition = {
 	id: 'batch',
@@ -7,7 +7,7 @@ export const BatchTool: ToolDefinition = {
 	parameters: [
 		{ name: 'tool_calls', type: 'array', description: 'Array of tool calls to execute. Each item has {tool: string, parameters: object}', required: true },
 	],
-	async execute(args, ctx): Promise<ToolResult> {
+	async execute(args, _ctx): Promise<ToolResult> {
 		const toolCalls = (args.tool_calls as Array<{ tool: string; parameters: Record<string, unknown> }>) ?? [];
 
 		if (toolCalls.length > 25) {

@@ -12,11 +12,11 @@ export interface ServerConfig {
 }
 
 // Provider OAuth types
-interface ProviderAuthAuthorization {
-  url: string
-  method: "auto" | "code"
-  instructions: string
-}
+// interface ProviderAuthAuthorization {
+//   url: string
+//   method: "auto" | "code"
+//   instructions: string
+// }
 
 // Kilo notification from kilo-gateway
 export interface KilocodeNotificationAction {
@@ -50,20 +50,21 @@ export interface KilocodeBalance {
   balance: number
 }
 
-interface ProfileData {
-  profile: KilocodeProfile
-  balance: KilocodeBalance | null
-  currentOrgId: string | null
-}
+// ProfileData - kept for documentation
+// interface ProfileData {
+//   profile: KilocodeProfile
+//   balance: KilocodeBalance | null
+//   currentOrgId: string | null
+// }
 
 // Cloud session from the Kilo cloud API (cli_sessions_v2)
-interface CloudSessionInfo {
-  session_id: string
-  title: string | null
-  created_at: string
-  updated_at: string
-  version: number
-}
+// interface CloudSessionInfo {
+//   session_id: string
+//   title: string | null
+//   created_at: string
+//   updated_at: string
+//   version: number
+// }
 
 // Full cloud session data for preview (from /kilo/cloud/session/:id)
 export interface CloudSessionMessage {
@@ -96,14 +97,15 @@ export interface CloudSessionData {
 }
 
 /** VS Code editor context sent alongside messages to the CLI backend */
-interface WorktreeFileDiff {
-  file: string
-  before: string
-  after: string
-  additions: number
-  deletions: number
-  status?: "added" | "deleted" | "modified"
-}
+// WorktreeFileDiff - kept for documentation
+// interface WorktreeFileDiff {
+//   file: string
+//   before: string
+//   after: string
+//   additions: number
+//   deletions: number
+//   status?: "added" | "deleted" | "modified"
+// }
 
 export interface EditorContext {
   /** Workspace-relative paths of currently visible editors */

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from '../tool-execution-service';
+import { ToolDefinition, ToolResult, resolvePath } from '../tool-execution-service';
 
 function detectLineEnding(text: string): '\n' | '\r\n' {
 	return text.includes('\r\n') ? '\r\n' : '\n';
@@ -93,7 +93,8 @@ function generateDiff(oldContent: string, newContent: string, filePath: string):
 		`+++ ${filePath}`,
 	];
 
-	const maxLen = Math.max(oldLines.length, newLines.length);
+	// _maxLen computed but not currently used
+	// const _maxLen = Math.max(oldLines.length, newLines.length);
 	let oldIdx = 0;
 	let newIdx = 0;
 

@@ -1,4 +1,4 @@
-import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
+import { ToolDefinition, ToolResult } from '../tool-execution-service';
 
 export const CodeSearchTool: ToolDefinition = {
 	id: 'codesearch',
@@ -8,7 +8,7 @@ export const CodeSearchTool: ToolDefinition = {
 		{ name: 'query', type: 'string', description: 'The code search query', required: true },
 		{ name: 'tokensNum', type: 'number', description: 'Number of tokens to return (1000-50000, default 5000)', required: false },
 	],
-	async execute(args, ctx): Promise<ToolResult> {
+	async execute(args, _ctx): Promise<ToolResult> {
 		const query = args.query as string;
 		const tokensNum = Math.max(1000, Math.min(50000, (args.tokensNum as number) ?? 5000));
 
@@ -35,8 +35,10 @@ export const CodeSearchTool: ToolDefinition = {
 			throw new Error(`CodeSearch failed: HTTP ${response.status}`);
 		}
 
-		const data = await response.json();
-		const content = data.result?.content?.[0]?.text || 'No code context found.';
+		const data = await response.json() as Record<string, unknown>;
+		const result = data?.result as Record<string, unknown> | undefined;
+		const contentArr = result?.content as Array<{ text: string }> | undefined;
+		const content = contentArr?.[0]?.text || 'No code context found.';
 
 		return {
 			title: `codesearch: ${query}`,
