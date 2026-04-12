@@ -27,8 +27,8 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@kilocode/plugin": "file:../../../../../kilocode/packages/plugin",
-    "@kilocode/sdk": "file:../sdk",
+    "@kilocode/plugin": "workspace:*",
+    "@kilocode/sdk": "workspace:*",
     "@ai-sdk/anthropic": "2.0.65",
     "@ai-sdk/openai": "2.0.101",
     "@ai-sdk/openai-compatible": "1.0.32",
