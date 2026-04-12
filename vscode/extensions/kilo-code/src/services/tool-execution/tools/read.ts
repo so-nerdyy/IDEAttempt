@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath, isPathWithinWorkspace } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath, isPathWithinWorkspace } from '../tool-execution-service';
 
 export const ReadTool: ToolDefinition = {
 	id: 'read',

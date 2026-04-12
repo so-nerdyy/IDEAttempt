@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ToolDefinition, ToolResult, ToolExecutionContext } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext } from '../tool-execution-service';
 
 export const QuestionTool: ToolDefinition = {
 	id: 'question',
