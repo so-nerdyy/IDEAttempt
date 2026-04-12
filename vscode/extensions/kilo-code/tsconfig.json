@@ -3,9 +3,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "outDir": "out",
-    "rootDir": "src",
     "sourceMap": true,
+    "skipLibCheck": true,
     "paths": {
       "@kilocode/sdk": ["./packages/sdk/src"],
       "@kilocode/sdk/*": ["./packages/sdk/src/*"],
@@ -16,12 +17,24 @@
   },
   "include": [
     "src/**/*.ts",
+    "packages/sdk/**/*.ts",
     "../../src/vscode-dts/vscode.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "packages",
+    "node_modules/bun-types",
+    "node_modules/@types/mdx",
     "out",
-    "dist"
+    "dist",
+    "packages/sdk/node_modules",
+    "packages/sdk/dist",
+    "packages/sdk/test",
+    "packages/sdk/example",
+    "packages/sdk/script",
+    "packages/kilo-gateway",
+    "packages/kilo-i18n",
+    "packages/kilo-telemetry",
+    "packages/kilo-ui",
+    "packages/opencode"
   ]
 }
