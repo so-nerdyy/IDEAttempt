@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from './tool-execution-service';
+import { ToolDefinition, ToolResult, ToolExecutionContext, resolvePath } from '../tool-execution-service';
 
 function detectLineEnding(text: string): '\n' | '\r\n' {
 	return text.includes('\r\n') ? '\r\n' : '\n';
